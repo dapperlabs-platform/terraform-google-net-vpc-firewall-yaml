@@ -15,12 +15,22 @@
  */
 
 locals {
-  firewall_rules = merge(
+  firewall_rules = var.config_path != null ? merge(
     [
       for config_file in fileset("${path.root}/${var.config_path}", "**/*.yaml") :
       try(yamldecode(file("${path.root}/${var.config_path}/${config_file}")), {})
     ]...
-  )
+    ) : merge([
+      for config_file in var.config_file_content : yamldecode(config_file)
+  ])
+  # firewall_rules = merge(
+  #   [
+  #     for config_file in fileset("${path.root}/${var.config_path}", "**/*.yaml") :
+  #     try(yamldecode(file("${path.root}/${var.config_path}/${config_file}")), {})
+  #     ], [
+  #     for config_file in var.config_file_content : yamldecode(config_file)
+  #   ]
+  # )
 }
 
 resource "time_static" "timestamp" {
